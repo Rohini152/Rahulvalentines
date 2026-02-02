@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Valentine?</title>
+  <style>
+    :root {
+      --bg1: #ffe6ef;
+      --bg2: #fff7fb;
+      --card: rgba(255, 255, 255, 0.85);
+      --text: #2b2b2b;
+      --yes: #ff4d7d;
+      --no: #6b7280;
+      --shadow: 0 20px 50px rgba(0,0,0,0.12);
+      --radius: 22px;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color: var(--text);
+      background: radial-gradient(1200px 700px at 20% 20%, var(--bg2), transparent 60%),
+                  radial-gradient(900px 600px at 80% 30%, #ffd6e6, transparent 55%),
+                  linear-gradient(135deg, var(--bg1), #fff);
+      overflow: hidden;
+    }
+
+    .hearts {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.55;
+      filter: blur(0.2px);
+    }
+    .heart {
+      position: absolute;
+      font-size: clamp(18px, 2.5vw, 28px);
+      animation: floatUp linear infinite;
+      user-select: none;
+    }
+    @keyframes floatUp {
+      from { transform: translateY(15vh) translateX(0) rotate(0deg); opacity: 0; }
+      10%  { opacity: 1; }
+      to   { transform: translateY(-110vh) translateX(8vw) rotate(20deg); opacity: 0; }
+    }
+
+    .card {
+      width: min(560px, 92vw);
+      background: var(--card);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.6);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: clamp(18px, 3.2vw, 30px);
+      position: relative;
+    }
+
+    .badge {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255, 77, 125, 0.12);
+      border: 1px solid rgba(255, 77, 125, 0.22);
+      font-weight: 600;
+      font-size: 14px;
+      letter-spacing: 0.2px;
+    }
+
+    h1 {
+      margin: 14px 0 8px;
+      font-size: clamp(26px, 4.5vw, 38px);
+      line-height: 1.1;
+    }
+
+    .sub {
+      margin: 0 0 18px;
+      opacity: 0.85;
+      font-size: 15px;
+    }
+
+    .arena {
+      margin-top: 14px;
+      position: relative;
+      height: 160px;
+      border-radius: 18px;
+      border: 1px dashed rgba(255, 77, 125, 0.35);
+      background: rgba(255, 255, 255, 0.55);
+      overflow: hidden;
+    }
+
+    .buttons {
+      position: absolute;
+      inset: 0;
+    }
+
+    button {
+      border: 0;
+      border-radius: 999px;
+      padding: 12px 18px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 120ms ease, box-shadow 120ms ease, filter 120ms ease;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    #yesBtn {
+      background: var(--yes);
+      color: white;
+      box-shadow: 0 14px 30px rgba(255, 77, 125, 0.35);
+      position: absolute;
+      left: 18px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+    #yesBtn:hover { filter: brightness(1.02); transform: translateY(-50%) scale(1.04); }
+    #yesBtn:active { transform: translateY(-50%) scale(0.98); }
+
+    #noBtn {
+      background: #e5e7eb;
+      color: #111827;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+      position: absolute;
+      right: 18px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+    #noBtn:hover { transform: translateY(-50%) scale(1.03); }
+    #noBtn:active { transform: translateY(-50%) scale(0.98); }
+
+    .result {
+      margin-top: 18px;
+      border-radius: 18px;
+      padding: 14px 14px;
+      background: rgba(255, 77, 125, 0.09);
+      border: 1px solid rgba(255, 77, 125, 0.22);
+      display: none;
+    }
+
+    .result .big {
+      font-size: 44px;
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+
+    .plan {
+      margin: 10px 0 0;
+      padding-left: 18px;
+    }
+    .plan li { margin: 6px 0; }
+
+    .footer {
+      margin-top: 14px;
+      font-size: 12px;
+      opacity: 0.65;
+      text-align: center;
+    }
+
+    /* Tiny confetti hearts on YES */
+    .pop {
+      position: fixed;
+      left: var(--x);
+      top: var(--y);
+      font-size: 18px;
+      animation: pop 900ms ease-out forwards;
+      pointer-events: none;
+      will-change: transform, opacity;
+    }
+    @keyframes pop {
+      0%   { transform: translate(-50%, -50%) scale(0.8); opacity: 1; }
+      70%  { opacity: 1; }
+      100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1.6); opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="hearts" id="bgHearts" aria-hidden="true"></div>
+
+  <main class="card">
+    <div class="badge">💌 A tiny question for Rahul</div>
+    <h1>Will you be my Valentine? 💗</h1>
+    <p class="sub">Choose wisely… the “No” button is a bit shy 😌</p>
+
+    <section class="arena" aria-label="Valentine buttons playground">
+      <div class="buttons">
+        <button id="yesBtn" type="button">Yes 💖</button>
+        <button id="noBtn" type="button">No 🙈</button>
+      </div>
+    </section>
+
+    <section class="result" id="result" aria-live="polite">
+      <div class="big">😍</div>
+      <div style="font-size: 18px; font-weight: 800; margin-bottom: 6px;">
+        YAY!! You’re the best, Rahul 💞
+      </div>
+      <div style="opacity: 0.9;">
+        Here’s our date plan:
+      </div>
+      <ul class="plan">
+        <li>🌸 Quick “get ready” playlist + a cute selfie</li>
+        <li>🍽️ Dinner at your favorite place (your pick!)</li>
+        <li>🍨 Dessert + “tell me your best memory of us” game</li>
+        <li>🚶‍♂️ A little walk + hand-holding (non-negotiable)</li>
+        <li>🎬 Cozy movie time with snacks at home</li>
+      </ul>
+      <div class="footer">Tip: screenshot this page as proof 😄</div>
+    </section>
+
+    <div class="footer">Made with love 💗</div>
+  </main>
+
+  <script>
+    // --- Background floating hearts ---
+    const bg = document.getElementById("bgHearts");
+    const heartEmojis = ["💗","💖","💘","💞","💕","💓","💝"];
+    const makeBgHearts = () => {
+      const count = 24;
+      for (let i = 0; i < count; i++) {
+        const s = document.createElement("div");
+        s.className = "heart";
+        s.textContent = heartEmojis[Math.floor(Math.random() * heartEmojis.length)];
+        s.style.left = Math.random() * 100 + "vw";
+        s.style.top = (70 + Math.random() * 60) + "vh";
+        s.style.animationDuration = (6 + Math.random() * 8) + "s";
+        s.style.animationDelay = (-Math.random() * 12) + "s";
+        s.style.transform = `translateY(0) translateX(${(Math.random()*6-3)}vw) rotate(${Math.random()*20-10}deg)`;
+        bg.appendChild(s);
+      }
+    };
+    makeBgHearts();
+
+    // --- No button runs away ---
+    const arena = document.querySelector(".arena");
+    const noBtn = document.getElementById("noBtn");
+    const yesBtn = document.getElementById("yesBtn");
+    const result = document.getElementById("result");
+
+    function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
+
+    function moveNoButton() {
+      const a = arena.getBoundingClientRect();
+      const b = noBtn.getBoundingClientRect();
+
+      // Keep within arena bounds with padding
+      const pad = 12;
+      const maxX = a.width - b.width - pad;
+      const maxY = a.height - b.height - pad;
+
+      // Random positions (weighted a bit away from YES)
+      let x = Math.random() * maxX;
+      let y = Math.random() * maxY;
+
+      // Avoid being too close to YES button
+      const yesRect = yesBtn.getBoundingClientRect();
+      const yesInArenaX = yesRect.left - a.left;
+      const yesInArenaY = yesRect.top - a.top;
+
+      const dx = x - yesInArenaX;
+      const dy = y - yesInArenaY;
+      const dist = Math.hypot(dx, dy);
+
+      if (dist < 120) {
+        x = clamp(x + (dx >= 0 ? 120 : -120), pad, maxX);
+        y = clamp(y + (dy >= 0 ? 60 : -60), pad, maxY);
+      }
+
+      noBtn.style.left = x + "px";
+      noBtn.style.top = y + "px";
+      noBtn.style.right = "auto";
+      noBtn.style.transform = "translate(0,0)";
+    }
+
+    // Run away on hover (desktop) and on touchstart (mobile)
+    noBtn.addEventListener("mouseenter", moveNoButton);
+    noBtn.addEventListener("touchstart", (e) => { e.preventDefault(); moveNoButton(); }, { passive: false });
+    noBtn.addEventListener("click", (e) => { e.preventDefault(); moveNoButton(); });
+
+    // --- YES celebration ---
+    function popHearts(x, y) {
+      const bursts = 14;
+      for (let i = 0; i < bursts; i++) {
+        const p = document.createElement("div");
+        p.className = "pop";
+        p.textContent = heartEmojis[Math.floor(Math.random() * heartEmojis.length)];
+        p.style.setProperty("--x", x + "px");
+        p.style.setProperty("--y", y + "px");
+        const dx = (Math.random() * 240 - 120) + "px";
+        const dy = (Math.random() * 200 - 160) + "px";
+        p.style.setProperty("--dx", dx);
+        p.style.setProperty("--dy", dy);
+        p.style.left = x + "px";
+        p.style.top = y + "px";
+        document.body.appendChild(p);
+        p.addEventListener("animationend", () => p.remove());
+      }
+    }
+
+    yesBtn.addEventListener("click", (e) => {
+      const x = e.clientX || (window.innerWidth / 2);
+      const y = e.clientY || (window.innerHeight / 2);
+      popHearts(x, y);
+
+      // Disable buttons and reveal the result
+      yesBtn.disabled = true;
+      noBtn.disabled = true;
+      yesBtn.style.filter = "brightness(1.02)";
+      noBtn.style.opacity = "0.5";
+      result.style.display = "block";
+
+      // Smooth scroll to result (nice on mobile)
+      result.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    });
+
+    // Initial “No” placement inside arena so it can move smoothly
+    // (moves it from right-based positioning to absolute left/top)
+    requestAnimationFrame(() => {
+      const a = arena.getBoundingClientRect();
+      const b = noBtn.getBoundingClientRect();
+      const left = (b.left - a.left);
+      const top  = (b.top - a.top);
+      noBtn.style.left = left + "px";
+      noBtn.style.top = top + "px";
+      noBtn.style.right = "auto";
+      noBtn.style.transform = "translate(0,0)";
+    });
+  </script>
+</body>
+</html>
